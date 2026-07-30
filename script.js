@@ -571,3 +571,136 @@ if(!reduced && matchMedia('(pointer:fine)').matches){
     document.hidden?ctx.suspend().catch(()=>{}):ctx.resume().catch(()=>{});
   });
 })();
+
+
+
+// ---------- ask-Kushal: portrait avatar (cursor parallax) + local answer engine ----------
+// Runs entirely in the browser. No API, no key, no network call — so it cannot
+// fail, cost anything, or be abused. It only knows what is written below.
+(()=>{
+  const root=document.getElementById('ask');
+  if(!root)return;
+  const avatar=document.getElementById('askAvatar'),panel=document.getElementById('askPanel'),
+        log=document.getElementById('askLog'),form=document.getElementById('askForm'),
+        input=document.getElementById('askInput'),send=document.getElementById('askSend'),
+        closeBtn=document.getElementById('askClose'),chips=document.getElementById('askChips'),
+        photo=root.querySelector('.ask-photo');
+
+  const KB=[
+    {k:['hello','hi','hey','morning','evening','greetings'],
+     a:"Hello. Ask me about Kushal's projects, his course, or what he's working on."},
+    {k:['who','about','yourself','background','introduce'],
+     a:"Kushal Basnet is a second-year Computing Systems student at Ulster University's London campus, with roots in Kathmandu. He builds across the stack — web, PHP, Java and Python — and is going deep on networking and traffic analysis."},
+    {k:['study','studying','university','uni','course','degree','college','ulster','school'],
+     a:"He's in his second year of Computing Systems at Ulster University, London campus. Current module work includes server-side PHP and the Programming in Practice Java module."},
+    {k:['project','projects','built','build','made','portfolio','showcase'],
+     a:"Five so far: the WeARit e-commerce site (group coursework, and it's live), server-side PHP module work, an SSL/TLS traffic analysis in Wireshark, a High Card card game in Java, and a switch-and-router lab network on Cisco IOS. Ask about any of them."},
+    {k:['wearit','ecommerce','commerce','shop','store','cart'],
+     a:"WeARit is a multi-page e-commerce site he built with a four-person team for Computer Systems Development — product pages, cart flow and responsive layout, written from scratch in HTML, CSS and JavaScript. It's live: the project card above links straight to the working shop."},
+    {k:['php','backend','sessions','forms'],
+     a:"PHP is his current module. He's building dynamic server-side applications — handling forms, sessions and database-driven pages, and learning how the back end of the web actually fits together."},
+    {k:['ssl','tls','wireshark','traffic','packet','pcap','handshake','encryption','cipher'],
+     a:"He captured and analysed encrypted web traffic in Wireshark — inspecting TLS handshakes, cipher suites and certificate exchange — then presented the findings in a recorded group vodcast and slide deck."},
+    {k:['java','card','game','oop','object','intellij'],
+     a:"The High Card Series game is a Java application for his Programming in Practice module: object-oriented design, game logic and console interaction, built in IntelliJ."},
+    {k:['network','networking','cisco','ccna','router','switch','vlan','subnet','lab'],
+     a:"He designed and configured a small routed network on Cisco IOS — VLANs, interface addressing and device hardening — and verified end-to-end connectivity from the CLI. Networking and traffic analysis are where he's going deepest."},
+    {k:['skill','skills','tech','stack','technologies','know','languages','language','tools'],
+     a:"Web: HTML, CSS, JavaScript and PHP. Programming: Python, Java, OOP, SQL and Git. Networking and security: TCP/IP, subnetting, Cisco IOS, VLANs, Wireshark and SSL/TLS. Plus data analytics, R and databases."},
+    {k:['python'],
+     a:"Python is part of his programming toolkit alongside Java, used across coursework and smaller projects."},
+    {k:['intern','internship','hire','hiring','job','available','opportunity','recruit','placement'],
+     a:"Yes — he's open to internships. The contact section below has his email and his LinkedIn, and he answers."},
+    {k:['contact','email','reach','touch','message','linkedin','github','connect'],
+     a:"Scroll to the contact section at the bottom — his email is there with a copy button, plus GitHub and LinkedIn."},
+    {k:['where','live','based','london','location','from','nepal','kathmandu','city'],
+     a:"He's based in London, studying at Ulster University's London campus. Originally from Kathmandu, Nepal."},
+    {k:['website','site','domain'],
+     a:"This site is his own — hand-written HTML, CSS and JavaScript on his own domain, with the packet-routing animation in the hero drawn on a canvas."},
+    {k:['thanks','thank','cheers','appreciate','great','nice','cool','awesome'],
+     a:"Any time. Have a look at the projects above, or use the contact section to reach him directly."}
+  ];
+  const FALLBACK="I only know about Kushal's projects, course and skills — I don't have an answer for that one. The contact section below is the best way to ask him directly.";
+
+  // Whole-word matching only — substring matching made "his" match "hi".
+  // Longer keywords score higher so a specific topic beats a generic one
+  // ("wearit" outranks "about" in "tell me about WeARit").
+  const esc=s=>s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+  KB.forEach(e=>{e.rx=e.k.map(k=>({w:k.length,re:new RegExp('\\b'+esc(k)+'\\b','i')}));});
+  function answerFor(q){
+    let best=null,bestScore=0;
+    for(const entry of KB){
+      let score=0;
+      for(const m of entry.rx) if(m.re.test(q)) score+=m.w;
+      if(score>bestScore){bestScore=score;best=entry;}
+    }
+    return bestScore>0?best.a:FALLBACK;
+  }
+
+  /* depth: the disc tilts toward the cursor and the photo drifts the other way,
+     which is what reads as three-dimensional rather than a flat sticker */
+  if(!reduced && matchMedia('(pointer:fine)').matches){
+    addEventListener('mousemove',e=>{
+      const r=avatar.getBoundingClientRect();
+      const dx=(e.clientX-(r.left+r.width/2))/innerWidth;
+      const dy=(e.clientY-(r.top+r.height/2))/innerHeight;
+      const near=Math.max(0,1-Math.hypot(dx,dy)*1.5);
+      avatar.style.transform='perspective(420px) rotateY('+(dx*22).toFixed(2)+'deg) rotateX('+(-dy*22).toFixed(2)+'deg) scale('+(1+near*.04)+')';
+      photo.style.transform='translate('+(-dx*9).toFixed(2)+'px,'+(-dy*9).toFixed(2)+'px)';
+    },{passive:true});
+  }
+
+  let open=false,busy=false;
+  function bubble(cls,text){
+    const el=document.createElement('div');
+    el.className='ask-msg '+cls;
+    el.textContent=text||'';
+    log.appendChild(el);log.scrollTop=log.scrollHeight;
+    return el;
+  }
+  function setOpen(v){
+    open=v;panel.hidden=!v;
+    avatar.setAttribute('aria-expanded',v?'true':'false');
+    if(v){
+      if(!log.childElementCount)bubble('bot',"Hi — I'm Kushal's assistant. Ask me about his projects, his course, or what he's working on.");
+      setTimeout(()=>input.focus(),80);
+    }
+  }
+  avatar.addEventListener('click',()=>setOpen(!open));
+  closeBtn.addEventListener('click',()=>setOpen(false));
+  addEventListener('keydown',e=>{if(e.key==='Escape'&&open)setOpen(false);});
+  chips.addEventListener('click',e=>{
+    const b=e.target.closest('button');
+    if(!b)return;
+    input.value=b.textContent;form.requestSubmit();
+  });
+
+  function ask(question){
+    if(busy)return;
+    busy=true;send.disabled=true;chips.hidden=true;
+    bubble('you',question);
+    const text=answerFor(question);
+    const el=bubble('bot','');
+    el.classList.add('ask-typing');
+    el.innerHTML='<span></span><span></span><span></span>';
+    // brief think, then reveal — keeps the cadence of a real conversation
+    setTimeout(()=>{
+      el.classList.remove('ask-typing');el.textContent='';
+      if(reduced){el.textContent=text;busy=false;send.disabled=false;log.scrollTop=log.scrollHeight;return;}
+      let i=0;
+      (function type(){
+        el.textContent=text.slice(0,i+=2);
+        log.scrollTop=log.scrollHeight;
+        if(i<text.length)setTimeout(type,12);
+        else{busy=false;send.disabled=false;}
+      })();
+    },420+Math.random()*320);
+  }
+
+  form.addEventListener('submit',e=>{
+    e.preventDefault();
+    const q=input.value.trim();
+    if(!q||busy)return;
+    input.value='';ask(q);
+  });
+})();

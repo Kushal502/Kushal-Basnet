@@ -248,6 +248,40 @@ document.documentElement.dataset.theme=localStorage.getItem('theme')||(matchMedi
   </div>
 </footer>
 
+<!-- ask-Kushal: portrait avatar + chat panel -->
+<div class="ask" id="ask">
+  <div class="ask-panel" id="askPanel" role="dialog" aria-label="Ask about Kushal" aria-modal="false" hidden>
+    <div class="ask-head">
+      <span class="ask-dot" aria-hidden="true"></span>
+      <div>
+        <strong>Ask about Kushal</strong>
+        <span>Projects, skills, background</span>
+      </div>
+      <button class="ask-close" id="askClose" aria-label="Close chat">&times;</button>
+    </div>
+    <div class="ask-log" id="askLog" role="log" aria-live="polite"></div>
+    <div class="ask-chips" id="askChips">
+      <button type="button">What has he built?</button>
+      <button type="button">What's he studying?</button>
+      <button type="button">Is he open to internships?</button>
+    </div>
+    <form class="ask-form" id="askForm">
+      <input id="askInput" type="text" autocomplete="off" maxlength="800" placeholder="Ask a question…" aria-label="Your question">
+      <button type="submit" id="askSend" aria-label="Send">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2 8h11M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </form>
+  </div>
+  <button class="ask-avatar" id="askAvatar" aria-label="Ask about Kushal" aria-expanded="false">
+    <span class="ask-orb" aria-hidden="true">
+      <span class="ask-photo"></span>
+      <span class="ask-sheen"></span>
+      <span class="ask-rim"></span>
+    </span>
+    <span class="ask-pulse" aria-hidden="true"></span>
+  </button>
+</div>
+
 <script src="script.js" defer></script>
 </body>
 </html>
