@@ -135,6 +135,7 @@ header.site.scrolled{box-shadow:0 4px 24px rgba(22,24,29,.07)}
 .mobile-menu a:active{color:var(--accent)}
 .btn{
   display:inline-block;background:var(--accent);color:#fff;text-decoration:none;
+  white-space:nowrap;
   padding:11px 24px;border-radius:999px;font-weight:600;font-size:.95rem;
   transition:transform .25s cubic-bezier(.22,1,.36,1),box-shadow .25s,background .25s;
   box-shadow:0 1px 2px rgba(22,24,29,.08);
@@ -364,6 +365,11 @@ footer.site{border-top:1px solid var(--edge);padding:46px 0;background:var(--pap
   body{font-size:16px}
   .wrap{padding:0 18px}
   .nav{height:64px}
+  /* header runs out of room here: brand + music + theme + CTA + burger
+     overflows, and the CTA was wrapping to two lines. The mobile menu
+     already carries "Get in touch", so drop it from the bar. */
+  .btn.nav-cta{display:none}
+  .nav-right{gap:10px}
   .mobile-menu{top:64px;max-height:calc(100dvh - 64px)}
   .hero{min-height:calc(100svh - 64px)}
   .hero h1{font-size:clamp(2.3rem,11vw,2.9rem)}
@@ -380,7 +386,6 @@ footer.site{border-top:1px solid var(--edge);padding:46px 0;background:var(--pap
 @media (max-width:360px){
   .wrap{padding:0 14px}
   .brand{font-size:1.15rem}
-  .btn.nav-cta{padding:8px 14px;font-size:.82rem}
   .hero-portrait{width:min(170px,62vw)}
   .chips{gap:7px}
   .chip{font-size:.68rem;padding:4px 9px}
