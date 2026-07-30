@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kushal Basnet — Computing Systems Student</title>
+<meta name="description" content="Kushal Basnet — Computing Systems student at Ulster University, London. Networking, security and data analytics projects.">
+<meta property="og:title" content="Kushal Basnet — Computing Systems Student">
+<meta property="og:description" content="Networking, security and full-stack projects — second-year Computing Systems student at Ulster University, London.">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#fff9f4">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23ea580c'/%3E%3Ctext x='16' y='22' font-family='Georgia,serif' font-size='16' fill='white' text-anchor='middle'%3EKB%3C/text%3E%3C/svg%3E">
+<script>/* set theme before first paint to avoid flashing */
+document.documentElement.dataset.theme=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Schibsted+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div id="progress" aria-hidden="true"></div>
+<div class="cur-ring" aria-hidden="true"></div>
+<div class="cur-dot" aria-hidden="true"></div>
+
+<header class="site">
+  <div class="wrap nav">
+    <a class="brand" href="#top">Kushal <span>Basnet</span></a>
+    <ul class="nav-links">
+      <li><a href="#projects" data-spy="projects">Projects</a></li>
+      <li><a href="#skills" data-spy="skills">Skills</a></li>
+      <li><a href="#journey" data-spy="journey">Journey</a></li>
+    </ul>
+    <div class="nav-right">
+      <button class="theme-btn" id="themeBtn" aria-label="Toggle dark mode">
+        <svg class="ic-moon" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M13.3 9.6A5.8 5.8 0 1 1 6.4 2.7a4.7 4.7 0 0 0 6.9 6.9z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+        <svg class="ic-sun" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="3.1" stroke="currentColor" stroke-width="1.4"/><path d="M8 .8v2M8 13.2v2M.8 8h2M13.2 8h2M2.9 2.9l1.4 1.4M11.7 11.7l1.4 1.4M13.1 2.9l-1.4 1.4M4.3 11.7l-1.4 1.4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+      </button>
+      <a class="btn nav-cta" href="#contact">Get in touch</a>
+      <button class="menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false" aria-controls="mobileMenu">
+        <span class="bars"><span></span><span></span><span></span></span>
+      </button>
+    </div>
+  </div>
+</header>
+<nav class="mobile-menu" id="mobileMenu" aria-label="Mobile navigation">
+  <a href="#projects">Projects</a>
+  <a href="#skills">Skills</a>
+  <a href="#journey">Journey</a>
+  <a href="#contact">Get in touch</a>
+</nav>
+
+<main id="top">
+
+  <!-- HERO — the packet-routing animation lives only in this section -->
+  <div class="hero">
+    <canvas id="net" aria-hidden="true"></canvas>
+    <div class="wrap hero-grid">
+      <div class="hero-copy">
+      <div class="status"><span class="dot"></span>Second-year student — Ulster University · London</div>
+      <h1><span class="w"><span>Kushal</span></span> <span class="w"><span><em>Basnet</em></span></span></h1>
+      <p class="lede">Computing Systems student building across the stack — <strong>web development</strong>, <strong>server-side PHP</strong>, <strong>Java &amp; Python</strong> — and going deep on <strong>networking and traffic analysis</strong>. Building my foundations properly, one project at a time.</p>
+      <p class="ping">$ ping kushal.dev — 64 bytes: icmp_seq=1 ttl=57 time=1.2 ms <span class="ok">— reachable, and learning fast</span> <span class="cur"></span></p>
+      </div>
+      <div class="hero-portrait" aria-hidden="true">
+        <svg viewBox="0 0 340 400" xmlns="http://www.w3.org/2000/svg">
+          <!-- backdrop -->
+          <circle cx="170" cy="190" r="150" fill="var(--accent-tint)"/>
+          <!-- rotating dashed ring -->
+          <g class="ring">
+            <circle cx="170" cy="190" r="162" fill="none" stroke="var(--accent)" stroke-width="2" stroke-dasharray="6 12" opacity=".55"/>
+          </g>
+          <!-- delivery flash ring -->
+          <circle class="flash" cx="170" cy="190" r="156" fill="none" stroke="var(--accent)" stroke-width="3"/>
+          <!-- orbiting network nodes -->
+          <g class="orbit">
+            <circle cx="170" cy="24" r="6" fill="var(--accent)"/>
+            <circle cx="170" cy="24" r="2.4" fill="#fff"/>
+            <circle cx="320" cy="240" r="5" fill="var(--accent)" opacity=".8"/>
+            <circle cx="320" cy="240" r="2" fill="#fff"/>
+          </g>
+          <!-- portrait clipped to backdrop circle -->
+          <clipPath id="pc"><circle cx="170" cy="190" r="150"/></clipPath>
+          <g clip-path="url(#pc)">
+            <image href="portrait_hd.png" x="20" y="46" width="300" height="294" preserveAspectRatio="xMidYMin slice"/>
+          </g>
+        </svg>
+        <div class="avail"><span class="adot"></span>Open to internships</div>
+      </div>
+    </div>
+    <div class="scroll-cue" aria-hidden="true">Scroll
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 4l5 6 5-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+  </div>
+
+  <!-- PROJECTS -->
+  <section id="projects">
+    <div class="wrap">
+      <p class="eyebrow reveal">Selected coursework &amp; projects</p>
+      <h2 class="section-title reveal">What I've been <em>building</em></h2>
+
+      <a class="project reveal" href="https://github.com/Kushal502/Group-C-CSD-CW2-Project-WeARit" target="_blank" rel="noopener">
+        <div class="p-num">01</div>
+        <div>
+          <div class="p-title">WeARit — E-commerce Website <span class="tag">Group project</span></div>
+          <p class="p-desc">A multi-page e-commerce site built with a four-person team for Computer Systems Development coursework — product pages, cart flow and responsive layout, built from scratch with HTML, CSS and JavaScript.</p>
+          <div class="chips"><span class="chip">HTML</span><span class="chip">CSS</span><span class="chip">JavaScript</span><span class="chip">Teamwork</span></div>
+        </div>
+        <div class="p-arrow">→</div>
+      </a>
+
+      <a class="project reveal" href="https://github.com/Kushal502/php-server-side-development-" target="_blank" rel="noopener">
+        <div class="p-num">02</div>
+        <div>
+          <div class="p-title">PHP Server-Side Development <span class="tag">Active</span></div>
+          <p class="p-desc">Current module work building dynamic server-side applications in PHP — handling forms, sessions and database-driven pages, and learning how the backend of the web actually works.</p>
+          <div class="chips"><span class="chip">PHP</span><span class="chip">Server-side</span><span class="chip">SQL</span></div>
+        </div>
+        <div class="p-arrow">→</div>
+      </a>
+
+      <a class="project reveal" href="https://github.com/Kushal502" target="_blank" rel="noopener">
+        <div class="p-num">03</div>
+        <div>
+          <div class="p-title">SSL/TLS Traffic Analysis <span class="tag">Group project</span></div>
+          <p class="p-desc">Captured and analysed encrypted web traffic with Wireshark — inspecting TLS handshakes, cipher suites and certificate exchange — and presented the findings in a recorded group vodcast and slide deck.</p>
+          <div class="chips"><span class="chip">Wireshark</span><span class="chip">SSL/TLS</span><span class="chip">PCAP analysis</span><span class="chip">Network security</span></div>
+        </div>
+        <div class="p-arrow">→</div>
+      </a>
+
+      <a class="project reveal" href="https://github.com/Kushal502/IntelijFile" target="_blank" rel="noopener">
+        <div class="p-num">04</div>
+        <div>
+          <div class="p-title">High Card Series Game <span class="tag">Java</span></div>
+          <p class="p-desc">A card-game application built in Java for the Programming in Practice module — object-oriented design, game logic and console interaction, developed in IntelliJ.</p>
+          <div class="chips"><span class="chip">Java</span><span class="chip">OOP</span><span class="chip">IntelliJ</span></div>
+        </div>
+        <div class="p-arrow">→</div>
+      </a>
+
+      <a class="project reveal" href="https://github.com/Kushal502" target="_blank" rel="noopener">
+        <div class="p-num">05</div>
+        <div>
+          <div class="p-title">Switch &amp; Router Lab Network <span class="tag">CCNA lab</span></div>
+          <p class="p-desc">Designed and configured a small routed network — VLANs, interface addressing, and device hardening — using Cisco IOS commands, verifying end-to-end connectivity from the CLI.</p>
+          <div class="chips"><span class="chip">Cisco IOS</span><span class="chip">Packet Tracer</span><span class="chip">Subnetting</span><span class="chip">VLANs</span></div>
+        </div>
+        <div class="p-arrow">→</div>
+      </a>
+
+    </div>
+  </section>
+
+  <!-- SKILLS -->
+  <section id="skills">
+    <div class="wrap">
+      <p class="eyebrow reveal">Capabilities</p>
+      <h2 class="section-title reveal">What I <em>work with</em></h2>
+      <div class="grid">
+        <div class="card reveal">
+          <h3>Web Development</h3>
+          <div class="chips"><span class="chip">HTML</span><span class="chip">CSS</span><span class="chip">JavaScript</span><span class="chip">PHP</span><span class="chip">Server-side</span></div>
+        </div>
+        <div class="card reveal">
+          <h3>Programming</h3>
+          <div class="chips"><span class="chip">Python</span><span class="chip">Java</span><span class="chip">OOP</span><span class="chip">SQL</span><span class="chip">Git / GitHub</span></div>
+        </div>
+        <div class="card reveal">
+          <h3>Networking &amp; Security</h3>
+          <div class="chips"><span class="chip">TCP/IP</span><span class="chip">Subnetting</span><span class="chip">Cisco IOS</span><span class="chip">VLANs</span><span class="chip">Wireshark</span><span class="chip">SSL/TLS</span></div>
+        </div>
+        <div class="card reveal">
+          <h3>Data &amp; Ways of Working</h3>
+          <div class="chips"><span class="chip">Data analytics</span><span class="chip">R</span><span class="chip">Databases</span><span class="chip">Agile / Scrum</span><span class="chip">Teamwork</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- JOURNEY -->
+  <section id="journey">
+    <div class="wrap">
+      <p class="eyebrow reveal">Education</p>
+      <h2 class="section-title reveal">The journey <em>so far</em></h2>
+
+      <div class="step reveal">
+        <div class="step-when">2024 — Present</div>
+        <div>
+          <h3>BSc (Hons) — Computing Systems</h3>
+          <p class="where">Ulster University · London campus</p>
+          <p>Now in second year, with modules spanning Computer Networking, Programming in Practice (Java), PHP Server-Side Development, Data Analytics, and Agile project management — heavy on group coursework, labs and presentations.</p>
+        </div>
+      </div>
+
+      <div class="step reveal">
+        <div class="step-when">Year 1 · 2024–25</div>
+        <div>
+          <h3>Foundations</h3>
+          <p class="where">Core first-year modules</p>
+          <p>Introduction to Databases (design &amp; SQL), Problem Solving for Computing (Python), Mathematics for Computing (logic, sets, probability), and Innovation and Society — plus a team-built e-commerce website as major coursework.</p>
+        </div>
+      </div>
+
+      <div class="step reveal">
+        <div class="step-when">Ongoing</div>
+        <div>
+          <h3>CCNA-aligned Networking Labs</h3>
+          <p class="where">Cisco networking curriculum</p>
+          <p>Working through hands-on switch and router configuration labs — building real command-line confidence with Cisco IOS.</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section id="contact" class="contact">
+    <div class="wrap">
+      <p class="eyebrow reveal">Contact</p>
+      <h2 class="reveal">Let's learn and <em>build together</em></h2>
+      <div class="email-row reveal">
+        <a class="email" id="emailLink" href="mailto:businesskb1200@gmail.com">businesskb1200@gmail.com</a>
+        <button class="copy-btn" id="copyBtn" type="button">Copy</button>
+      </div>
+      <div class="socials reveal">
+        <a href="https://github.com/kushal502" target="_blank" rel="noopener">
+          <svg viewBox="0 0 16 16" width="17" height="17" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.5 7.5 0 0 1 2-.27c.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+          GitHub
+        </a>
+        <a href="https://www.linkedin.com/in/kushal502" target="_blank" rel="noopener">
+          <svg viewBox="0 0 16 16" width="17" height="17" fill="currentColor" aria-hidden="true"><path d="M13.63 13.63h-2.37V9.92c0-.89-.02-2.03-1.24-2.03-1.24 0-1.43.97-1.43 1.96v3.78H6.22V6h2.28v1.04h.03c.32-.6 1.09-1.24 2.25-1.24 2.4 0 2.85 1.58 2.85 3.64v4.19zM3.54 4.96a1.38 1.38 0 1 1 0-2.75 1.38 1.38 0 0 1 0 2.75zM4.72 13.63H2.35V6h2.37v7.63zM14.82 0H1.18C.53 0 0 .52 0 1.15v13.7C0 15.48.53 16 1.18 16h13.63c.65 0 1.19-.52 1.19-1.15V1.15C16 .52 15.46 0 14.82 0z"/></svg>
+          LinkedIn
+        </a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site">
+  <div class="wrap foot">
+    <div>© 2026 Kushal Basnet</div>
+    <div>London · Kathmandu roots</div>
+  </div>
+</footer>
+
+<script src="script.js" defer></script>
+</body>
+</html>
