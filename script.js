@@ -414,3 +414,160 @@ if(!reduced && matchMedia('(pointer:fine)').matches){
     el.addEventListener('mouseleave',()=>{el.style.transform='';});
   });
 }
+
+
+// ---------- cozy ambient music (Web Audio — generated live, no audio files, no requests) ----------
+(()=>{
+  const btn=document.getElementById('musicBtn');
+  const AC=window.AudioContext||window.webkitAudioContext;
+  if(!btn||!AC)return;
+
+  const KEY='music', CHORD=8;                  // seconds per chord
+  const mid=n=>440*Math.pow(2,(n-69)/12);      // midi note -> Hz
+  // Fmaj9 · Am7 · Dm9 · B♭maj7 — warm and unhurried, loops every 32s
+  const PROG=[
+    {bass:41,pad:[65,69,72,76,79]},
+    {bass:45,pad:[69,72,76,79]},
+    {bass:38,pad:[62,65,69,72,76]},
+    {bass:46,pad:[58,62,65,69]}
+  ];
+  // F major pentatonic — diatonic to every chord above, so stray notes can't clash
+  const SCALE=[72,74,77,79,81,84,86];
+
+  let ctx,master,rev,delay,timer,step=0,next=0,playing=false,armed=false;
+
+  function impulse(dur,decay){
+    const n=Math.floor(ctx.sampleRate*dur),b=ctx.createBuffer(2,n,ctx.sampleRate);
+    for(let c=0;c<2;c++){const d=b.getChannelData(c);
+      for(let i=0;i<n;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/n,decay);}
+    return b;
+  }
+
+  function build(){
+    ctx=new AC();
+    master=ctx.createGain();master.gain.value=0;
+    const comp=ctx.createDynamicsCompressor();
+    comp.threshold.value=-18;comp.ratio.value=3;
+    master.connect(comp);comp.connect(ctx.destination);
+
+    rev=ctx.createConvolver();rev.buffer=impulse(3.2,2.4);
+    const wet=ctx.createGain();wet.gain.value=.5;
+    rev.connect(wet);wet.connect(master);
+
+    delay=ctx.createDelay(1);delay.delayTime.value=.42;
+    const fb=ctx.createGain();fb.gain.value=.34;
+    const tone=ctx.createBiquadFilter();tone.type='lowpass';tone.frequency.value=1800;
+    delay.connect(tone);tone.connect(fb);fb.connect(delay);
+    delay.connect(master);delay.connect(rev);
+
+    // barely-there tape hiss — the thing that makes it feel cosy rather than clinical
+    const nb=ctx.createBuffer(1,ctx.sampleRate*4,ctx.sampleRate),nd=nb.getChannelData(0);
+    for(let i=0;i<nd.length;i++)nd[i]=(Math.random()*2-1)*.5;
+    const ns=ctx.createBufferSource();ns.buffer=nb;ns.loop=true;
+    const nf=ctx.createBiquadFilter();nf.type='bandpass';nf.frequency.value=1400;nf.Q.value=.6;
+    const ng=ctx.createGain();ng.gain.value=.02;
+    ns.connect(nf);nf.connect(ng);ng.connect(master);ns.start();
+  }
+
+  function pad(t,n){
+    const o=ctx.createOscillator(),o2=ctx.createOscillator(),g=ctx.createGain(),f=ctx.createBiquadFilter();
+    o.type='triangle';o2.type='sine';
+    o.frequency.value=mid(n);o2.frequency.value=mid(n);o2.detune.value=7;
+    f.type='lowpass';f.frequency.value=760;f.Q.value=.6;
+    g.gain.setValueAtTime(0,t);
+    g.gain.linearRampToValueAtTime(.05,t+2.6);
+    g.gain.setValueAtTime(.05,t+CHORD-1.2);
+    g.gain.linearRampToValueAtTime(0,t+CHORD+1.6);
+    o.connect(f);o2.connect(f);f.connect(g);g.connect(master);g.connect(rev);
+    o.start(t);o2.start(t);o.stop(t+CHORD+1.8);o2.stop(t+CHORD+1.8);
+  }
+
+  function bass(t,n){
+    const o=ctx.createOscillator(),g=ctx.createGain();
+    o.type='sine';o.frequency.value=mid(n);
+    g.gain.setValueAtTime(0,t);
+    g.gain.linearRampToValueAtTime(.13,t+1.4);
+    g.gain.linearRampToValueAtTime(0,t+CHORD+1);
+    o.connect(g);g.connect(master);
+    o.start(t);o.stop(t+CHORD+1.2);
+  }
+
+  function pluck(t,n){
+    const o=ctx.createOscillator(),g=ctx.createGain();
+    o.type='sine';o.frequency.value=mid(n);
+    g.gain.setValueAtTime(0,t);
+    g.gain.linearRampToValueAtTime(.085,t+.012);
+    g.gain.exponentialRampToValueAtTime(.0001,t+2.2);
+    o.connect(g);g.connect(master);g.connect(delay);g.connect(rev);
+    o.start(t);o.stop(t+2.3);
+  }
+
+  function schedule(){
+    while(next<ctx.currentTime+1.5){
+      const c=PROG[step%PROG.length];
+      c.pad.forEach(n=>pad(next,n));
+      bass(next,c.bass);
+      const drops=2+Math.floor(Math.random()*3);
+      for(let i=0;i<drops;i++)pluck(next+Math.random()*CHORD,SCALE[Math.floor(Math.random()*SCALE.length)]);
+      next+=CHORD;step++;
+    }
+  }
+
+  function paint(){
+    btn.classList.toggle('playing',playing);
+    btn.setAttribute('aria-pressed',playing?'true':'false');
+    btn.setAttribute('aria-label',playing?'Turn ambient music off':'Turn ambient music on');
+  }
+
+  async function start(){
+    if(playing)return;
+    if(!ctx)build();
+    try{await ctx.resume();}catch(e){return;}
+    playing=true;
+    if(next<ctx.currentTime)next=ctx.currentTime+.15;   // context clock froze while suspended
+    const t=ctx.currentTime;
+    master.gain.cancelScheduledValues(t);
+    master.gain.setValueAtTime(master.gain.value,t);
+    master.gain.linearRampToValueAtTime(.62,t+2.2);
+    schedule();
+    timer=setInterval(schedule,300);
+    paint();
+  }
+
+  function stop(){
+    if(!playing)return;
+    playing=false;
+    clearInterval(timer);timer=null;
+    const t=ctx.currentTime;
+    master.gain.cancelScheduledValues(t);
+    master.gain.setValueAtTime(master.gain.value,t);
+    master.gain.linearRampToValueAtTime(0,t+1.2);
+    setTimeout(()=>{if(!playing&&ctx)ctx.suspend().catch(()=>{});},1500);
+    paint();
+  }
+
+  btn.addEventListener('click',()=>{
+    disarm();
+    if(playing){localStorage.setItem(KEY,'off');stop();}
+    else{localStorage.setItem(KEY,'on');start();}
+  });
+
+  // No browser allows audible sound before a gesture, so "on by default" means armed:
+  // it fades in on whatever the visitor touches first.
+  const EVS=['pointerdown','keydown','wheel','touchstart','scroll'];
+  function disarm(){if(!armed)return;armed=false;EVS.forEach(e=>removeEventListener(e,go));}
+  function go(e){
+    if(e&&e.target&&e.target.closest&&e.target.closest('#musicBtn'))return; // let the button speak for itself
+    disarm();start();
+  }
+  if(localStorage.getItem(KEY)!=='off'){
+    armed=true;
+    EVS.forEach(e=>addEventListener(e,go,{passive:true}));
+  }
+
+  // don't keep playing into a tab nobody's looking at
+  document.addEventListener('visibilitychange',()=>{
+    if(!ctx||!playing)return;
+    document.hidden?ctx.suspend().catch(()=>{}):ctx.resume().catch(()=>{});
+  });
+})();
