@@ -460,7 +460,7 @@ if(!reduced && matchMedia('(pointer:fine)').matches){
     master.connect(comp);comp.connect(ctx.destination);
 
     rev=ctx.createConvolver();rev.buffer=impulse(3.2,2.4);
-    const wet=ctx.createGain();wet.gain.value=.5;
+    const wet=ctx.createGain();wet.gain.value=.32;
     rev.connect(wet);wet.connect(master);
 
     delay=ctx.createDelay(1);delay.delayTime.value=.42;
@@ -468,14 +468,6 @@ if(!reduced && matchMedia('(pointer:fine)').matches){
     const tone=ctx.createBiquadFilter();tone.type='lowpass';tone.frequency.value=1800;
     delay.connect(tone);tone.connect(fb);fb.connect(delay);
     delay.connect(master);delay.connect(rev);
-
-    // barely-there tape hiss — the thing that makes it feel cosy rather than clinical
-    const nb=ctx.createBuffer(1,ctx.sampleRate*4,ctx.sampleRate),nd=nb.getChannelData(0);
-    for(let i=0;i<nd.length;i++)nd[i]=(Math.random()*2-1)*.5;
-    const ns=ctx.createBufferSource();ns.buffer=nb;ns.loop=true;
-    const nf=ctx.createBiquadFilter();nf.type='bandpass';nf.frequency.value=1400;nf.Q.value=.6;
-    const ng=ctx.createGain();ng.gain.value=.02;
-    ns.connect(nf);nf.connect(ng);ng.connect(master);ns.start();
   }
 
   function pad(t,n){
@@ -532,12 +524,16 @@ if(!reduced && matchMedia('(pointer:fine)').matches){
     if(playing)return;
     if(!ctx)build();
     try{await ctx.resume();}catch(e){return;}
+    // A wheel or scroll isn't a "user activation" in Chrome, so the context can come
+    // back still suspended. Bail quietly and stay armed for a real click/tap/keypress
+    // rather than lighting the button up over silence.
+    if(ctx.state!=='running')return;
     playing=true;
     if(next<ctx.currentTime)next=ctx.currentTime+.15;   // context clock froze while suspended
     const t=ctx.currentTime;
     master.gain.cancelScheduledValues(t);
     master.gain.setValueAtTime(master.gain.value,t);
-    master.gain.linearRampToValueAtTime(.62,t+2.2);
+    master.gain.linearRampToValueAtTime(.26,t+3.5);
     schedule();
     timer=setInterval(schedule,300);
     paint();
@@ -567,7 +563,7 @@ if(!reduced && matchMedia('(pointer:fine)').matches){
   function disarm(){if(!armed)return;armed=false;EVS.forEach(e=>removeEventListener(e,go));}
   function go(e){
     if(e&&e.target&&e.target.closest&&e.target.closest('#musicBtn'))return; // let the button speak for itself
-    disarm();start();
+    start().then(()=>{if(playing)disarm();});                               // only give up the arming once sound is actually running
   }
   if(localStorage.getItem(KEY)!=='off'){
     armed=true;
