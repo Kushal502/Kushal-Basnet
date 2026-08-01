@@ -80,6 +80,15 @@ window.addEventListener('scroll',()=>{
   siteHeader.classList.toggle('scrolled',h.scrollTop>8);
 },{passive:true});
 
+// brand click — always return to the very top of the page.
+// The bare #top anchor lands on <main>, which starts below the header,
+// and repeat clicks on an already-current hash do nothing at all.
+document.querySelector('.brand').addEventListener('click',e=>{
+  e.preventDefault();
+  history.replaceState(null,'','#top');
+  window.scrollTo({top:0,behavior:reduced?'auto':'smooth'});
+});
+
 // mobile menu
 const menuBtn=document.getElementById('menuBtn');
 const mobileMenu=document.getElementById('mobileMenu');
