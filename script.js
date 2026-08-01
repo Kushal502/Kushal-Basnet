@@ -431,7 +431,11 @@ if(!reduced && matchMedia('(pointer:fine)').matches){
   const AC=window.AudioContext||window.webkitAudioContext;
   if(!btn||!AC)return;
 
-  const KEY='music', CHORD=8;                  // seconds per chord
+  // Deliberately not the old 'music' key. An earlier build could show the button as
+  // playing while silent, so anyone who clicked it to "start" the music actually stored
+  // 'off' — a preference they never meant to set, which then survived every reload.
+  // Moving the key retires those bad values; the toggle behaves normally from here.
+  const KEY='music.v2', CHORD=8;               // seconds per chord
   const mid=n=>440*Math.pow(2,(n-69)/12);      // midi note -> Hz
   // Fmaj9 · Am7 · Dm9 · B♭maj7 — warm and unhurried, loops every 32s
   const PROG=[
