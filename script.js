@@ -443,7 +443,7 @@ if(!reduced && matchMedia('(pointer:fine)').matches){
   // F major pentatonic — diatonic to every chord above, so stray notes can't clash
   const SCALE=[72,74,77,79,81,84,86];
 
-  let ctx,master,rev,delay,timer,step=0,next=0,playing=false,armed=false;
+  let ctx,master,rev,delay,timer,step=0,next=0,playing=false,armed=false,starting=false;
 
   function impulse(dur,decay){
     const n=Math.floor(ctx.sampleRate*dur),b=ctx.createBuffer(2,n,ctx.sampleRate);
@@ -521,22 +521,26 @@ if(!reduced && matchMedia('(pointer:fine)').matches){
   }
 
   async function start(){
-    if(playing)return;
-    if(!ctx)build();
-    try{await ctx.resume();}catch(e){return;}
-    // A wheel or scroll isn't a "user activation" in Chrome, so the context can come
-    // back still suspended. Bail quietly and stay armed for a real click/tap/keypress
-    // rather than lighting the button up over silence.
-    if(ctx.state!=='running')return;
-    playing=true;
-    if(next<ctx.currentTime)next=ctx.currentTime+.15;   // context clock froze while suspended
-    const t=ctx.currentTime;
-    master.gain.cancelScheduledValues(t);
-    master.gain.setValueAtTime(master.gain.value,t);
-    master.gain.linearRampToValueAtTime(.26,t+3.5);
-    schedule();
-    timer=setInterval(schedule,300);
-    paint();
+    if(playing||starting)return;   // several armed events can land before the await below resolves
+    starting=true;
+    try{
+      if(!ctx)build();
+      try{await ctx.resume();}catch(e){return;}
+      // A wheel or scroll isn't a "user activation", so the context can come back still
+      // suspended. Bail quietly and stay armed for a real click/tap/keypress rather than
+      // lighting the button up over silence.
+      if(ctx.state!=='running')return;
+      playing=true;
+      if(next<ctx.currentTime)next=ctx.currentTime+.15;   // context clock froze while suspended
+      const t=ctx.currentTime;
+      master.gain.cancelScheduledValues(t);
+      master.gain.setValueAtTime(master.gain.value,t);
+      master.gain.linearRampToValueAtTime(.26,t+3.5);
+      schedule();
+      clearInterval(timer);
+      timer=setInterval(schedule,300);
+      paint();
+    }finally{starting=false;}
   }
 
   function stop(){
@@ -559,7 +563,10 @@ if(!reduced && matchMedia('(pointer:fine)').matches){
 
   // No browser allows audible sound before a gesture, so "on by default" means armed:
   // it fades in on whatever the visitor touches first.
-  const EVS=['pointerdown','keydown','wheel','touchstart','scroll'];
+  // Only some of these actually grant a "user activation": pointerdown/click/keydown do,
+  // touchend does on iOS where touchstart never has, and wheel/scroll never do. The ones
+  // that can't will fail harmlessly against the ctx.state check and leave us armed.
+  const EVS=['pointerdown','click','keydown','touchend','wheel','scroll'];
   function disarm(){if(!armed)return;armed=false;EVS.forEach(e=>removeEventListener(e,go));}
   function go(e){
     if(e&&e.target&&e.target.closest&&e.target.closest('#musicBtn'))return; // let the button speak for itself
