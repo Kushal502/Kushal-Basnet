@@ -448,6 +448,11 @@ if(!reduced && matchMedia('(pointer:fine)').matches){
   const SCALE=[72,74,77,79,81,84,86];
 
   let ctx,master,rev,delay,timer,step=0,next=0,playing=false,armed=false,starting=false;
+  // Every oscillator we've scheduled, with the time it ends. schedule() runs up to a chord
+  // ahead of the clock, so stopping has to be able to cut the ones still in the future —
+  // otherwise they're waiting to fire the next time the music is switched on.
+  let voices=[];
+  const track=(o,end)=>voices.push({o,end});
 
   function impulse(dur,decay){
     const n=Math.floor(ctx.sampleRate*dur),b=ctx.createBuffer(2,n,ctx.sampleRate);
@@ -485,6 +490,7 @@ if(!reduced && matchMedia('(pointer:fine)').matches){
     g.gain.linearRampToValueAtTime(0,t+CHORD+1.6);
     o.connect(f);o2.connect(f);f.connect(g);g.connect(master);g.connect(rev);
     o.start(t);o2.start(t);o.stop(t+CHORD+1.8);o2.stop(t+CHORD+1.8);
+    track(o,t+CHORD+1.8);track(o2,t+CHORD+1.8);
   }
 
   function bass(t,n){
@@ -495,6 +501,7 @@ if(!reduced && matchMedia('(pointer:fine)').matches){
     g.gain.linearRampToValueAtTime(0,t+CHORD+1);
     o.connect(g);g.connect(master);
     o.start(t);o.stop(t+CHORD+1.2);
+    track(o,t+CHORD+1.2);
   }
 
   function pluck(t,n){
@@ -505,9 +512,11 @@ if(!reduced && matchMedia('(pointer:fine)').matches){
     g.gain.exponentialRampToValueAtTime(.0001,t+2.2);
     o.connect(g);g.connect(master);g.connect(delay);g.connect(rev);
     o.start(t);o.stop(t+2.3);
+    track(o,t+2.3);
   }
 
   function schedule(){
+    if(voices.length)voices=voices.filter(v=>v.end>ctx.currentTime);   // notes that have finished can't be cut
     while(next<ctx.currentTime+1.5){
       const c=PROG[step%PROG.length];
       c.pad.forEach(n=>pad(next,n));
@@ -535,7 +544,11 @@ if(!reduced && matchMedia('(pointer:fine)').matches){
       // lighting the button up over silence.
       if(ctx.state!=='running')return;
       playing=true;
-      if(next<ctx.currentTime)next=ctx.currentTime+.15;   // context clock froze while suspended
+      // Always restart the scheduler right here, never "wherever it got to". stop() suspends the
+      // context, which freezes ctx.currentTime, so next — already up to a chord and a half ahead —
+      // stays in the future and the old `if(next<ctx.currentTime)` guard never fired. The result
+      // was up to ~9.5s of dead silence after pressing play, with the button lit the whole time.
+      next=ctx.currentTime+.15;
       const t=ctx.currentTime;
       master.gain.cancelScheduledValues(t);
       master.gain.setValueAtTime(master.gain.value,t);
@@ -555,6 +568,11 @@ if(!reduced && matchMedia('(pointer:fine)').matches){
     master.gain.cancelScheduledValues(t);
     master.gain.setValueAtTime(master.gain.value,t);
     master.gain.linearRampToValueAtTime(0,t+1.2);
+    // Cut everything still queued, just after the fade lands. Left alone these notes survive the
+    // suspend and play into the next session on top of the fresh chord.
+    const cut=t+1.3;
+    voices.forEach(v=>{try{v.o.stop(cut);}catch(e){}});
+    voices=[];
     setTimeout(()=>{if(!playing&&ctx)ctx.suspend().catch(()=>{});},1500);
     paint();
   }
